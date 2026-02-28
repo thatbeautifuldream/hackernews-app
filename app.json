@@ -36,6 +36,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7925a86b-6e50-47a0-979a-6cd1289bb859"
+      }
+    },
+    "owner": "milind-mishra"
   }
 }
