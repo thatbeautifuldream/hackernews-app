@@ -1,73 +1,184 @@
-# Minimal Template
+# Hacker News App
 
-This is a [React Native](https://reactnative.dev/) project built with [Expo](https://expo.dev/) and [React Native Reusables](https://reactnativereusables.com).
+A modern Hacker News reader built with React Native, Expo, and TanStack Query.
 
-It was initialized using the following command:
+## Features
 
-```bash
-npx @react-native-reusables/cli@latest init -t hackernews-app
+- **Multiple Story Categories**: Browse Top, New, Best, Ask, Show, and Job stories
+- **Infinite Scrolling**: Seamlessly load more stories as you scroll
+- **Story Details**: View full story details with nested comments
+- **Pull to Refresh**: Refresh story lists with pull-to-refresh
+- **Offline Support**: Caching for offline viewing
+- **Dark Mode**: Full dark mode support
+- **Type-Safe**: Built with TypeScript using `type` declarations (not `interface`)
+
+## Tech Stack
+
+- **Framework**: React Native 0.81.5 with Expo 54
+- **Navigation**: Expo Router (file-based routing)
+- **Data Fetching**: TanStack Query v5
+- **Styling**: NativeWind (Tailwind CSS for React Native)
+- **API**: HackerNews Firebase API
+- **Language**: TypeScript (all types prefixed with `T`)
+
+## Type Convention
+
+This project follows a strict type convention:
+- All types use `type` (not `interface`)
+- All types are prefixed with `T`
+- Examples:
+  - `THNItem` - HackerNews item type
+  - `THNUser` - HackerNews user type
+  - `TStoryType` - Story category type
+  - `TUseStoriesParams` - Hook parameter type
+  - `TStoryItemProps` - Component props type
+
+## Project Structure
+
+```
+hackernews-app/
+├── app/                        # Expo Router pages
+│   ├── _layout.tsx             # Root layout with QueryClientProvider
+│   ├── (tabs)/                 # Tab navigation
+│   │   ├── _layout.tsx         # Tab bar configuration
+│   │   ├── top.tsx             # Top stories
+│   │   ├── new.tsx             # New stories
+│   │   ├── best.tsx            # Best stories
+│   │   ├── ask.tsx             # Ask HN stories
+│   │   ├── show.tsx            # Show HN stories
+│   │   └── jobs.tsx           # Job stories
+│   └── story/
+│       └── [id].tsx           # Story detail with comments
+├── components/                 # Reusable components
+│   ├── StoryItem.tsx           # Story list item
+│   ├── Comment.tsx             # Comment component with expand/collapse
+│   ├── StoryItemSkeleton.tsx    # Loading skeleton
+│   ├── ErrorMessage.tsx         # Error display
+│   └── StoriesScreen.tsx       # Stories list screen
+├── hooks/                      # TanStack Query hooks
+│   ├── useStories.ts           # Infinite query for stories
+│   ├── useStory.ts            # Single story query
+│   ├── useComments.ts         # Comments batch query
+│   └── useUser.ts             # User profile query
+├── lib/
+│   ├── api/
+│   │   ├── hackernews.ts      # API functions
+│   │   └── queryKeys.ts      # Query key factory
+│   ├── query-client.ts        # Query client configuration
+│   ├── query-client-instance.ts # Query client instance
+│   └── utils/
+│       ├── date.ts            # Date formatting utilities
+│       └── number.ts          # Number formatting utilities
+└── types/
+    └── hackernews.ts         # TypeScript type definitions
 ```
 
 ## Getting Started
 
-To run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm, yarn, or bun
+- Expo Go app (for mobile) or web browser
+
+### Installation
 
 ```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    # or
-    bun dev
+npm install
 ```
 
-This will start the Expo Dev Server. Open the app in:
-
-- **iOS**: press `i` to launch in the iOS simulator _(Mac only)_
-- **Android**: press `a` to launch in the Android emulator
-- **Web**: press `w` to run in a browser
-
-You can also scan the QR code using the [Expo Go](https://expo.dev/go) app on your device. This project fully supports running in Expo Go for quick testing on physical devices.
-
-## Adding components
-
-You can add more reusable components using the CLI:
+### Development
 
 ```bash
-npx react-native-reusables/cli@latest add [...components]
+npm run dev
 ```
 
-> e.g. `npx react-native-reusables/cli@latest add input textarea`
+Then:
+- Press `w` to open in web browser
+- Press `a` to open Android emulator
+- Press `i` to open iOS simulator
 
-If you don't specify any component names, you'll be prompted to select which components to add interactively. Use the `--all` flag to install all available components at once.
+### Build for Production
 
-## Project Features
+```bash
+# Android
+npm run android
 
-- ⚛️ Built with [Expo Router](https://expo.dev/router)
-- 🎨 Styled with [Tailwind CSS](https://tailwindcss.com/) via [Nativewind](https://www.nativewind.dev/)
-- 📦 UI powered by [React Native Reusables](https://github.com/founded-labs/react-native-reusables)
-- 🚀 New Architecture enabled
-- 🔥 Edge to Edge enabled
-- 📱 Runs on iOS, Android, and Web
+# iOS
+npm run ios
 
-## Learn More
+# Web
+npm run web
+```
 
-To dive deeper into the technologies used:
+## Key Implementation Details
 
-- [React Native Docs](https://reactnative.dev/docs/getting-started)
-- [Expo Docs](https://docs.expo.dev/)
-- [Nativewind Docs](https://www.nativewind.dev/)
-- [React Native Reusables](https://reactnativereusables.com)
+### TanStack Query Setup
 
-## Deploy with EAS
+The app uses a configured QueryClient with optimal defaults:
+- `staleTime: 5 minutes` - Data is fresh for 5 min
+- `gcTime: 30 minutes` - Cache kept for 30 min
+- `retry: 3` with exponential backoff - Failed requests retry
+- Online/Offline detection with NetInfo
+- App state awareness for refetching
 
-The easiest way to deploy your app is with [Expo Application Services (EAS)](https://expo.dev/eas).
+### Infinite Scrolling
 
-- [EAS Build](https://docs.expo.dev/build/introduction/)
-- [EAS Updates](https://docs.expo.dev/eas-update/introduction/)
-- [EAS Submit](https://docs.expo.dev/submit/introduction/)
+Stories are loaded in batches (20 per page) using `useInfiniteQuery`:
+- Automatically loads next page when scrolling
+- Maintains scroll position
+- Deduplicates identical queries
 
----
+### Query Keys
 
-If you enjoy using React Native Reusables, please consider giving it a ⭐ on [GitHub](https://github.com/founded-labs/react-native-reusables). Your support means a lot!
+Hierarchical query keys for cache management:
+```typescript
+['stories', 'list', 'top']      // Top stories list
+['item', 12345]                  // Specific story
+['user', 'pg']                    // User profile
+```
+
+### Type Safety
+
+Full TypeScript coverage with custom types:
+- `THNItem` - All HackerNews items (stories, comments, jobs, polls)
+- `THNUser` - User profiles
+- `TStoryType` - Story categories
+- All hook parameters and returns typed
+
+## API Integration
+
+Uses the official HackerNews Firebase API:
+- **Base URL**: `https://hacker-news.firebaseio.com/v0`
+- **Endpoints**:
+  - `/topstories` - Top 500 stories
+  - `/newstories` - Newest 500 stories
+  - `/beststories` - Best stories
+  - `/askstories` - Ask HN stories
+  - `/showstories` - Show HN stories
+  - `/jobstories` - Job stories
+  - `/item/{id}` - Story/comment details
+  - `/user/{id}` - User profile
+
+## Performance Optimizations
+
+1. **Request Batching**: Fetch multiple items in parallel using `useQueries`
+2. **Memoization**: Components use `React.memo` for expensive renders
+3. **Virtualization**: FlatList for efficient large list rendering
+4. **Cache Strategies**: Optimal staleTime and gcTime settings
+5. **Lazy Loading**: Comments loaded only when story is opened
+6. **Prefetching**: Story details prefetched when needed
+
+## Future Enhancements
+
+- [ ] Search functionality (Algolia HN API)
+- [ ] User profile pages
+- [ ] Bookmark/favorite stories
+- [ ] Comment threading improvements
+- [ ] Story filtering and sorting options
+- [ ] Notifications for top stories
+- [ ] Analytics integration
+
+## License
+
+MIT
